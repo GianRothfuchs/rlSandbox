@@ -31,24 +31,26 @@ class tictactoe:
         #print(np.array([col_p1,row_p1,diag1_p1,diag2_p1]))
         if np.any(np.array([col_p1,row_p1,diag1_p1,diag2_p1])):
             self.gameOver = True
-            print('p1 wins')
-            return 1 # p1 wins
+            print(self.num2name[1]+' wins')
+            return self.num2name[1] # p1 wins
         else:
             #print(np.array([col_p2,row_p2,diag1_p2,diag2_p2]))
             if np.any(np.array([col_p2,row_p2,diag1_p2,diag2_p2])):
                 self.gameOver = True
-                print('p2 wins')
-                return 2 #p2 wins
+                print(self.num2name[-1]+' wins')
+                return self.num2name[-1] #p2 wins
             else:
                 if self.emptyFields == 0:
                     self.gameOver = True
-                    return 0 # tie
+                    return 'tie' # tie
                 else:    
-                    return -1 # game in progres
+                    return 'na' # game in progres
+                
     def getEmptyFields(self):
         self.emptyFields = np.sum(self.board == 0)
         res = np.where(self.board == 0)
         return list(zip(res[0], res[1]))
+    
     def doMove(self,field):
         if field in self.getEmptyFields():
             if not self.gameOver:
@@ -74,10 +76,10 @@ class tictactoe:
         print(playerToken)
         self.name2num = {"p1":playerToken[0],"p2":playerToken[1]}
         self.num2name = {playerToken[0]:"p1",playerToken[1]:"p2"}
-        
         self.currentPlayer = 1
         print(self.num2name[1]+" goes first")
-        #name2num = {playerToken}
+    def randomPlayer2(self):
+        
         
     
         
