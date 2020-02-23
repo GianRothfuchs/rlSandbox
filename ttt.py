@@ -65,8 +65,20 @@ class tictactoe:
         self.board = np.zeros((self.boardSize,self.boardSize),dtype=np.int8)
         self.gameOver = False
         self.State = None
-        self.currentPlayer = 1
         self.emptyFields = self.boardSize**2
+        self.randomStart()
+    
+    def randomStart(self):
+        playerToken = np.array([1,-1])
+        np.random.shuffle(playerToken)
+        print(playerToken)
+        self.name2num = {"p1":playerToken[0],"p2":playerToken[1]}
+        self.num2name = {playerToken[0]:"p1",playerToken[1]:"p2"}
+        
+        self.currentPlayer = 1
+        print(self.num2name[1]+" goes first")
+        #name2num = {playerToken}
+        
     
         
         # also check for player 2
@@ -85,8 +97,8 @@ ttt.doMove((1,0))
 ttt.doMove((2,1))
 ttt.doMove((2,0))
 #print(ttt.winner())
+print(ttt.randomStart())
 
-#ttt.resetBoard()
 
 
 
