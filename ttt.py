@@ -54,6 +54,7 @@ class tictactoe:
     def doMove(self,field):
         if field in self.getEmptyFields():
             if not self.gameOver:
+                print(self.num2name[self.currentPlayer] + " played:")
                 self.board[field] = self.currentPlayer
                 self.currentPlayer = self.currentPlayer * -1
                 print(self.board)
@@ -73,33 +74,53 @@ class tictactoe:
     def randomStart(self):
         playerToken = np.array([1,-1])
         np.random.shuffle(playerToken)
-        print(playerToken)
         self.name2num = {"p1":playerToken[0],"p2":playerToken[1]}
         self.num2name = {playerToken[0]:"p1",playerToken[1]:"p2"}
         self.currentPlayer = 1
         print(self.num2name[1]+" goes first")
-    def randomPlayer2(self):
         
+    def randomPlayer2(self):
+        if self.name2num["p2"] == self.currentPlayer:
+            if not self.gameOver:
+                availableFields = self.getEmptyFields()
+                randArray = np.random.choice(len(availableFields), 1)
+                randAction = availableFields[randArray.item()]
+                self.doMove(randAction)
+            else:
+                print("game is over")
+        else:
+            print("Its p1's turn, p2 cannot move now")
+    
+    def doSimMove(self,field):
+        if self.num2name[1] == "p1":
+            self.doMove(field)
+            self.randomPlayer2()
+        else:
+            self.randomPlayer2()
+            self.doMove(field)
+            
         
     
         
         # also check for player 2
         
 ttt = tictactoe(3,'p1','p2')
-ttt.getState()
+
+
+#ttt.getState()
 
 #tmp =ttt.board 
 #tmp = -np.eye(3)
 #ttt.board  = tmp
 
-ttt.doMove((0,1))
-ttt.doMove((0,0))
-ttt.doMove((1,1))
-ttt.doMove((1,0))
-ttt.doMove((2,1))
-ttt.doMove((2,0))
+ttt.doSimMove((0,1))
+
+
 #print(ttt.winner())
-print(ttt.randomStart())
+#print(ttt.randomStart())
+#print(ttt.getEmptyFields())
+#print(len(ttt.getEmptyFields()))
+#ttt.randomPlayer2()
 
 
 
