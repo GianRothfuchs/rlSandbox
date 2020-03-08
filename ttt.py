@@ -7,6 +7,7 @@ Created on Wed Feb 19 21:39:18 2020
 """
 
 import numpy as np
+import random as rnd
 
 class tictactoe:
     def __init__(self,bsize,p1,p2):
@@ -54,7 +55,7 @@ class tictactoe:
     def doMove(self,field):
         if field in self.getEmptyFields():
             if not self.gameOver:
-                print(self.num2name[self.currentPlayer] + " played:")
+                print(self.num2name[self.currentPlayer] +"[" + str(self.currentPlayer) + "]" + " played:")
                 self.board[field] = self.currentPlayer
                 self.currentPlayer = self.currentPlayer * -1
                 print(self.board)
@@ -91,13 +92,20 @@ class tictactoe:
         else:
             print("Its p1's turn, p2 cannot move now")
     
+    def initSim(self):
+        if self.num2name[1] == "p2":
+            self.randomPlayer2()
+            
     def doSimMove(self,field):
-        if self.num2name[1] == "p1":
-            self.doMove(field)
-            self.randomPlayer2()
+        if field in self.getEmptyFields():
+            if self.num2name[1] == "p1":
+                self.doMove(field)
+            else:
+                print("XXXXX--case should not happen--XXXXX")
+                self.randomPlayer2()
+                self.doMove(field)
         else:
-            self.randomPlayer2()
-            self.doMove(field)
+            print("sim-move failed")
             
         
     
@@ -106,6 +114,17 @@ class tictactoe:
         
 ttt = tictactoe(3,'p1','p2')
 
+ttt.initSim()
+gameOver = ttt.gameOver 
+
+while not gameOver:
+    randMove = rnd.choice(ttt.getEmptyFields())
+    print("p1 moved: " + str(randMove))
+    ttt.doSimMove(randMove)
+    gameOver = ttt.gameOver
+
+print("Game ended in state: " + ttt.winner())
+    
 
 #ttt.getState()
 
@@ -113,7 +132,7 @@ ttt = tictactoe(3,'p1','p2')
 #tmp = -np.eye(3)
 #ttt.board  = tmp
 
-ttt.doSimMove((0,1))
+#ttt.doSimMove((0,1))
 
 
 #print(ttt.winner())
