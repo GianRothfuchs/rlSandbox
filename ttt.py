@@ -14,11 +14,28 @@ class tictactoe:
         self.boardSize = bsize
         self.p1 = p1
         self.p2 = p2
+        self.name2num = {self.p1:1,self.p2:-1}
+        self.num2name = {1:self.p1,-1:self.p2}
+        self.transitionMap = {self.p1:self.p2,self.p2:self.p1}
         self.resetBoard()
-
+        
+    def resetBoard(self):
+        self.board = np.zeros((self.boardSize,self.boardSize),dtype=np.int8)
+        self.gameOver = False
+        self.State = None
+        self.emptyFields = self.boardSize**2
+        self.randomStart()
+        
+    def randomStart(self):
+        playerToken = np.array([1,-1])
+        np.random.shuffle(playerToken)
+        self.currentPlayer = self.num2name[playerToken[0]]
+        print(self.currentPlayer +" goes first")
+        
     def getState(self):
         self.State = hash(str(self.board.reshape(self.boardSize**2)))
-    def winner(self):
+        
+    def getWinner(self):
         col_p1 = np.any(np.equal(np.sum(self.board,0),np.full(self.boardSize, self.boardSize)))
         row_p1 = np.any(np.equal(np.sum(self.board,1),np.full(self.boardSize, self.boardSize)))
         diag1_p1 = np.equal(np.sum(np.multiply(self.board,np.eye(self.boardSize))),self.boardSize)
@@ -32,80 +49,82 @@ class tictactoe:
         #print(np.array([col_p1,row_p1,diag1_p1,diag2_p1]))
         if np.any(np.array([col_p1,row_p1,diag1_p1,diag2_p1])):
             self.gameOver = True
-            print(self.num2name[1]+' wins')
-            return self.num2name[1] # p1 wins
+            print('GAME OVER: ' + self.p1 +' wins')
+            return self.p1 # p1 wins
         else:
             #print(np.array([col_p2,row_p2,diag1_p2,diag2_p2]))
             if np.any(np.array([col_p2,row_p2,diag1_p2,diag2_p2])):
                 self.gameOver = True
-                print(self.num2name[-1]+' wins')
-                return self.num2name[-1] #p2 wins
+                print('GAME OVER: ' + self.p1 +' wins')
+                return self.p2 #p2 wins
             else:
                 if self.emptyFields == 0:
                     self.gameOver = True
+                    print('GAME OVER: Tie ')
                     return 'tie' # tie
                 else:    
                     return 'na' # game in progres
                 
     def getEmptyFields(self):
         self.emptyFields = np.sum(self.board == 0)
-        res = np.where(self.board == 0)
-        return list(zip(res[0], res[1]))
-    
-    def doMove(self,field):
-        if field in self.getEmptyFields():
-            if not self.gameOver:
-                print(self.num2name[self.currentPlayer] +"[" + str(self.currentPlayer) + "]" + " played:")
-                self.board[field] = self.currentPlayer
-                self.currentPlayer = self.currentPlayer * -1
-                print(self.board)
-                self.winner()
-            else:
-                print('game is over')
+        if self.emptyFields > 0:
+            res = np.where(self.board == 0)
+            return list(zip(res[0], res[1]))
         else:
-            print('move failed')
-                       
-    def resetBoard(self):
-        self.board = np.zeros((self.boardSize,self.boardSize),dtype=np.int8)
-        self.gameOver = False
-        self.State = None
-        self.emptyFields = self.boardSize**2
-        self.randomStart()
+            return list()
     
-    def randomStart(self):
-        playerToken = np.array([1,-1])
-        np.random.shuffle(playerToken)
-        self.name2num = {"p1":playerToken[0],"p2":playerToken[1]}
-        self.num2name = {playerToken[0]:"p1",playerToken[1]:"p2"}
-        self.currentPlayer = 1
-        print(self.num2name[1]+" goes first")
-        
+    
+    def doMove(self,field,player):
+        otpt = False
+        if self.currentPlayer == player:
+            if field in self.getEmptyFields():
+                if not self.gameOver:
+                    print(self.currentPlayer + " played: {0}".format(field))
+                    self.board[field] = self.name2num[self.currentPlayer]
+                    print(self.board)
+                    self.currentPlayer = self.transitionMap[self.currentPlayer]
+                    self.getWinner()
+                    self.getEmptyFields()
+                    otpt = True
+                else:
+                    print("doMove: game over")
+            else:
+                print("doMove: field is already taken")
+        else:
+            print("doMove: Its not player " + player + "'s turn")
+        return otpt
+
     def randomPlayer2(self):
-        if self.name2num["p2"] == self.currentPlayer:
+        if self.p2 == self.currentPlayer:
             if not self.gameOver:
                 availableFields = self.getEmptyFields()
                 randArray = np.random.choice(len(availableFields), 1)
                 randAction = availableFields[randArray.item()]
-                self.doMove(randAction)
+                self.doMove(randAction,self.p2)
             else:
                 print("game is over")
         else:
             print("Its p1's turn, p2 cannot move now")
     
     def initSim(self):
-        if self.num2name[1] == "p2":
+        self.resetBoard()
+        if self.currentPlayer == self.p2:
             self.randomPlayer2()
             
+            
     def doSimMove(self,field):
-        if field in self.getEmptyFields():
-            if self.num2name[1] == "p1":
-                self.doMove(field)
-            else:
-                print("XXXXX--case should not happen--XXXXX")
-                self.randomPlayer2()
-                self.doMove(field)
-        else:
-            print("sim-move failed")
+        if not self.gameOver:
+            if self.p1 == self.currentPlayer:
+                ok = self.doMove(field,self.p1)
+                self.getWinner()
+                if ok:
+                    if not self.gameOver:
+                        self.randomPlayer2()
+                        self.getWinner()
+        return self.gameOver
+                
+
+
             
         
     
@@ -115,15 +134,29 @@ class tictactoe:
 ttt = tictactoe(3,'p1','p2')
 
 ttt.initSim()
-gameOver = ttt.gameOver 
 
-while not gameOver:
+gameOverTrue = ttt.gameOver
+
+while not gameOverTrue:
     randMove = rnd.choice(ttt.getEmptyFields())
-    print("p1 moved: " + str(randMove))
     ttt.doSimMove(randMove)
-    gameOver = ttt.gameOver
+    gameOverTrue = ttt.gameOver
 
-print("Game ended in state: " + ttt.winner())
+    
+    
+print("Game ended in state: " + ttt.getWinner())
+
+
+#
+#gameOver = ttt.gameOver 
+#
+#while not gameOver:
+#    randMove = rnd.choice(ttt.getEmptyFields())
+#    print("p1 moved: " + str(randMove))
+#    ttt.doSimMove(randMove)
+#    gameOver = ttt.gameOver
+#
+#print("Game ended in state: " + ttt.winner())
     
 
 #ttt.getState()
