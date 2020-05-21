@@ -10,7 +10,7 @@ import numpy as np
 import random as rnd
 
 class tictactoe:
-    def __init__(self,bsize,p1,p2):
+    def __init__(self,bsize,p1,p2,showField):
         self.boardSize = bsize
         self.p1 = p1
         self.p2 = p2
@@ -18,6 +18,9 @@ class tictactoe:
         self.num2name = {1:self.p1,-1:self.p2}
         self.transitionMap = {self.p1:self.p2,self.p2:self.p1}
         self.resetBoard()
+        self.showField = showField
+        
+    
         
     def resetBoard(self):
         self.board = np.zeros((self.boardSize,self.boardSize),dtype=np.int8)
@@ -34,6 +37,7 @@ class tictactoe:
         
     def getState(self):
         self.State = hash(str(self.board.reshape(self.boardSize**2)))
+        return self.State 
         
     def getWinner(self):
         col_p1 = np.any(np.equal(np.sum(self.board,0),np.full(self.boardSize, self.boardSize)))
@@ -55,7 +59,7 @@ class tictactoe:
             #print(np.array([col_p2,row_p2,diag1_p2,diag2_p2]))
             if np.any(np.array([col_p2,row_p2,diag1_p2,diag2_p2])):
                 self.gameOver = True
-                print('GAME OVER: ' + self.p1 +' wins')
+                print('GAME OVER: ' + self.p2 +' wins')
                 return self.p2 #p2 wins
             else:
                 if self.emptyFields == 0:
@@ -79,9 +83,10 @@ class tictactoe:
         if self.currentPlayer == player:
             if field in self.getEmptyFields():
                 if not self.gameOver:
-                    print(self.currentPlayer + " played: {0}".format(field))
                     self.board[field] = self.name2num[self.currentPlayer]
-                    print(self.board)
+                    if self.showField:
+                        print(self.currentPlayer + " played: {0}".format(field))
+                        print(self.board)
                     self.currentPlayer = self.transitionMap[self.currentPlayer]
                     self.getWinner()
                     self.getEmptyFields()
@@ -131,20 +136,28 @@ class tictactoe:
         
         # also check for player 2
         
-ttt = tictactoe(3,'p1','p2')
+ttt = tictactoe(3,'p1','p2',False)
 
 ttt.initSim()
 
 gameOverTrue = ttt.gameOver
+counter = 0
 
-while not gameOverTrue:
-    randMove = rnd.choice(ttt.getEmptyFields())
-    ttt.doSimMove(randMove)
+while counter < 1000:
+    print("------ ITER: " + str(counter))
+    
+    while not gameOverTrue:
+        randMove = rnd.choice(ttt.getEmptyFields())
+        ttt.doSimMove(randMove)
+        gameOverTrue = ttt.gameOver
+        if gameOverTrue:
+            counter += 1
+            print(ttt.getState())
+            
+    ttt.initSim()
     gameOverTrue = ttt.gameOver
-
     
-    
-print("Game ended in state: " + ttt.getWinner())
+# print("Game ended in state: " + ttt.getWinner())
 
 
 #
